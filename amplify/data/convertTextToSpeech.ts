@@ -22,7 +22,7 @@ export const handler: Schema["convertTextToSpeech"]["functionHandler"] = async (
 
   return (
     result.SynthesisTask?.OutputUri?.replace(
-      "https://s3.us-east-1.amazonaws.com/" +
+      "https://s3.ap-northeast-1.amazonaws.com/" +
         env.PREDICTIONS_GEN_2_BUCKET_NAME +
         "/public/",
       ""
