@@ -17,14 +17,22 @@ const client = generateClient<Schema>();
 type PollyReturnType = Schema["convertTextToSpeech"]["returnType"];
 
 const Polly = () => {
+    const [text, setText] = useState(""); // フォーム入力の文字列
     const [src, setSrc] = useState("");
     const [file, setFile] = useState<PollyReturnType>("");
     return (
       <div className="flex flex-col">
+        <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)} // 入力値をセット
+        placeholder="Enter text to synthesize"
+        className="border p-2 mb-4"
+      />
         <button
           onClick={async () => {
             const { data, errors } = await client.mutations.convertTextToSpeech({
-              text: "Hello World!",
+              text,
             });            
   
             if (!errors && data) {
@@ -49,7 +57,7 @@ const Polly = () => {
         >
           Fetch audio
         </button>
-        <a href={src}>Get audio file</a>
+        <a className="mx-auto" href={src}>Get audio file</a>
       </div>
     );
 }

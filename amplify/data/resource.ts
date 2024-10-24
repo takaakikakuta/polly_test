@@ -10,9 +10,24 @@ export const convertTextToSpeech = defineFunction({
 });
 
 const schema = a.schema({
-  Todo: a
+  typeSetting: a.enum([
+    'Room',
+    'Demo',
+    'Item'
+  ]),
+
+  RoomData:a
     .model({
-      content: a.string(),
+      type:a.ref('typeSetting'),
+      template:a.string(),
+      templateName:a.string(),
+      thumbnail:a.string(),
+      videos:a.string().array().array()
+    })
+    .authorization(allow => [allow.publicApiKey()]),
+  Navigation: a
+    .model({
+      text: a.string(),
     })
     .authorization(allow => [allow.publicApiKey()]),
   convertTextToSpeech: a

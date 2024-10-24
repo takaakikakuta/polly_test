@@ -14,7 +14,7 @@ export const handler: Schema["convertTextToSpeech"]["functionHandler"] = async (
     SampleRate: "8000",
     Text: event.arguments.text,
     TextType: "text",
-    VoiceId: "Amy",
+    VoiceId: "Takumi",
     OutputS3BucketName: env.PREDICTIONS_GEN_2_BUCKET_NAME,
     OutputS3KeyPrefix: "public/",
   });

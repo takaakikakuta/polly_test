@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-amplify/ui-react": "^6.5.5",
     "@aws-sdk/client-polly": "^3.670.0",
     "aws-amplify": "^6.6.4",
     "next": "14.2.15",
