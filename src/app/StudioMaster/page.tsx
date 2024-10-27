@@ -43,8 +43,15 @@ const page = () => {
        <a href="/StudioMaster/RoomDataCreate">RoomDataを作成する</a>
        <p>ユーザー一覧</p>
        {user?.users?.map((user) => (
-      <li key={user?.Username}>{user?.Email}</li>
-       ))}
+        <li key={user?.Username}>
+          {user?.Email}
+          <ul>
+            {user?.Groups?.map((group) => (
+              <li key={group}>{group}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
     </div>
   )
 }

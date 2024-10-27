@@ -25,6 +25,9 @@ const page = () => {
     getCurrentUserAsync();
   }, []);
 
+  console.log(user);
+  
+
   return (
     <Authenticator>
     {({ signOut, user }) => (
