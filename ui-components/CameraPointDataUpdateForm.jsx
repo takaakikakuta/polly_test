@@ -4,11 +4,13 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { createNavigation } from "./graphql/mutations";
+import { getCameraPointData } from "./graphql/queries";
+import { updateCameraPointData } from "./graphql/mutations";
 const client = generateClient();
-export default function NavigationCreateForm(props) {
+export default function CameraPointDataUpdateForm(props) {
   const {
-    clearOnSuccess = true,
+    id: idProp,
+    cameraPointData: cameraPointDataModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -18,28 +20,51 @@ export default function NavigationCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    templateId: "",
-    order: "",
-    text: "",
-    src: "",
+    slug: "",
+    radian: "",
+    image: "",
+    cameraRadian: "",
   };
-  const [templateId, setTemplateId] = React.useState(initialValues.templateId);
-  const [order, setOrder] = React.useState(initialValues.order);
-  const [text, setText] = React.useState(initialValues.text);
-  const [src, setSrc] = React.useState(initialValues.src);
+  const [slug, setSlug] = React.useState(initialValues.slug);
+  const [radian, setRadian] = React.useState(initialValues.radian);
+  const [image, setImage] = React.useState(initialValues.image);
+  const [cameraRadian, setCameraRadian] = React.useState(
+    initialValues.cameraRadian
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setTemplateId(initialValues.templateId);
-    setOrder(initialValues.order);
-    setText(initialValues.text);
-    setSrc(initialValues.src);
+    const cleanValues = cameraPointDataRecord
+      ? { ...initialValues, ...cameraPointDataRecord }
+      : initialValues;
+    setSlug(cleanValues.slug);
+    setRadian(cleanValues.radian);
+    setImage(cleanValues.image);
+    setCameraRadian(cleanValues.cameraRadian);
     setErrors({});
   };
+  const [cameraPointDataRecord, setCameraPointDataRecord] = React.useState(
+    cameraPointDataModelProp
+  );
+  React.useEffect(() => {
+    const queryData = async () => {
+      const record = idProp
+        ? (
+            await client.graphql({
+              query: getCameraPointData.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getCameraPointData
+        : cameraPointDataModelProp;
+      setCameraPointDataRecord(record);
+    };
+    queryData();
+  }, [idProp, cameraPointDataModelProp]);
+  React.useEffect(resetStateValues, [cameraPointDataRecord]);
   const validations = {
-    templateId: [],
-    order: [],
-    text: [],
-    src: [],
+    slug: [],
+    radian: [],
+    image: [],
+    cameraRadian: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -67,10 +92,10 @@ export default function NavigationCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          templateId,
-          order,
-          text,
-          src,
+          slug: slug ?? null,
+          radian: radian ?? null,
+          image: image ?? null,
+          cameraRadian: cameraRadian ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -101,18 +126,16 @@ export default function NavigationCreateForm(props) {
             }
           });
           await client.graphql({
-            query: createNavigation.replaceAll("__typename", ""),
+            query: updateCameraPointData.replaceAll("__typename", ""),
             variables: {
               input: {
+                id: cameraPointDataRecord.id,
                 ...modelFields,
               },
             },
           });
           if (onSuccess) {
             onSuccess(modelFields);
-          }
-          if (clearOnSuccess) {
-            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -121,133 +144,138 @@ export default function NavigationCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "NavigationCreateForm")}
+      {...getOverrideProps(overrides, "CameraPointDataUpdateForm")}
       {...rest}
     >
       <TextField
-        label="Template id"
+        label="Slug"
         isRequired={false}
         isReadOnly={false}
-        value={templateId}
+        value={slug}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              templateId: value,
-              order,
-              text,
-              src,
+              slug: value,
+              radian,
+              image,
+              cameraRadian,
             };
             const result = onChange(modelFields);
-            value = result?.templateId ?? value;
+            value = result?.slug ?? value;
           }
-          if (errors.templateId?.hasError) {
-            runValidationTasks("templateId", value);
+          if (errors.slug?.hasError) {
+            runValidationTasks("slug", value);
           }
-          setTemplateId(value);
+          setSlug(value);
         }}
-        onBlur={() => runValidationTasks("templateId", templateId)}
-        errorMessage={errors.templateId?.errorMessage}
-        hasError={errors.templateId?.hasError}
-        {...getOverrideProps(overrides, "templateId")}
+        onBlur={() => runValidationTasks("slug", slug)}
+        errorMessage={errors.slug?.errorMessage}
+        hasError={errors.slug?.hasError}
+        {...getOverrideProps(overrides, "slug")}
       ></TextField>
       <TextField
-        label="Order"
+        label="Radian"
         isRequired={false}
         isReadOnly={false}
         type="number"
         step="any"
-        value={order}
+        value={radian}
         onChange={(e) => {
           let value = isNaN(parseInt(e.target.value))
             ? e.target.value
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
-              templateId,
-              order: value,
-              text,
-              src,
+              slug,
+              radian: value,
+              image,
+              cameraRadian,
             };
             const result = onChange(modelFields);
-            value = result?.order ?? value;
+            value = result?.radian ?? value;
           }
-          if (errors.order?.hasError) {
-            runValidationTasks("order", value);
+          if (errors.radian?.hasError) {
+            runValidationTasks("radian", value);
           }
-          setOrder(value);
+          setRadian(value);
         }}
-        onBlur={() => runValidationTasks("order", order)}
-        errorMessage={errors.order?.errorMessage}
-        hasError={errors.order?.hasError}
-        {...getOverrideProps(overrides, "order")}
+        onBlur={() => runValidationTasks("radian", radian)}
+        errorMessage={errors.radian?.errorMessage}
+        hasError={errors.radian?.hasError}
+        {...getOverrideProps(overrides, "radian")}
       ></TextField>
       <TextField
-        label="Text"
+        label="Image"
         isRequired={false}
         isReadOnly={false}
-        value={text}
+        value={image}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              templateId,
-              order,
-              text: value,
-              src,
+              slug,
+              radian,
+              image: value,
+              cameraRadian,
             };
             const result = onChange(modelFields);
-            value = result?.text ?? value;
+            value = result?.image ?? value;
           }
-          if (errors.text?.hasError) {
-            runValidationTasks("text", value);
+          if (errors.image?.hasError) {
+            runValidationTasks("image", value);
           }
-          setText(value);
+          setImage(value);
         }}
-        onBlur={() => runValidationTasks("text", text)}
-        errorMessage={errors.text?.errorMessage}
-        hasError={errors.text?.hasError}
-        {...getOverrideProps(overrides, "text")}
+        onBlur={() => runValidationTasks("image", image)}
+        errorMessage={errors.image?.errorMessage}
+        hasError={errors.image?.hasError}
+        {...getOverrideProps(overrides, "image")}
       ></TextField>
       <TextField
-        label="Src"
+        label="Camera radian"
         isRequired={false}
         isReadOnly={false}
-        value={src}
+        type="number"
+        step="any"
+        value={cameraRadian}
         onChange={(e) => {
-          let { value } = e.target;
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
-              templateId,
-              order,
-              text,
-              src: value,
+              slug,
+              radian,
+              image,
+              cameraRadian: value,
             };
             const result = onChange(modelFields);
-            value = result?.src ?? value;
+            value = result?.cameraRadian ?? value;
           }
-          if (errors.src?.hasError) {
-            runValidationTasks("src", value);
+          if (errors.cameraRadian?.hasError) {
+            runValidationTasks("cameraRadian", value);
           }
-          setSrc(value);
+          setCameraRadian(value);
         }}
-        onBlur={() => runValidationTasks("src", src)}
-        errorMessage={errors.src?.errorMessage}
-        hasError={errors.src?.hasError}
-        {...getOverrideProps(overrides, "src")}
+        onBlur={() => runValidationTasks("cameraRadian", cameraRadian)}
+        errorMessage={errors.cameraRadian?.errorMessage}
+        hasError={errors.cameraRadian?.hasError}
+        {...getOverrideProps(overrides, "cameraRadian")}
       ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Clear"
+          children="Reset"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          {...getOverrideProps(overrides, "ClearButton")}
+          isDisabled={!(idProp || cameraPointDataModelProp)}
+          {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
           gap="15px"
@@ -257,7 +285,10 @@ export default function NavigationCreateForm(props) {
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={Object.values(errors).some((e) => e?.hasError)}
+            isDisabled={
+              !(idProp || cameraPointDataModelProp) ||
+              Object.values(errors).some((e) => e?.hasError)
+            }
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>

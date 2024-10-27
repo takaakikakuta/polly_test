@@ -185,37 +185,53 @@ export default function RoomDataCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    type: "",
     template: "",
     templateName: "",
     thumbnail: "",
+    model: "",
     videos: [],
+    CameraPointList: [],
+    Navigations: "",
   };
-  const [type, setType] = React.useState(initialValues.type);
   const [template, setTemplate] = React.useState(initialValues.template);
   const [templateName, setTemplateName] = React.useState(
     initialValues.templateName
   );
   const [thumbnail, setThumbnail] = React.useState(initialValues.thumbnail);
+  const [model, setModel] = React.useState(initialValues.model);
   const [videos, setVideos] = React.useState(initialValues.videos);
+  const [CameraPointList, setCameraPointList] = React.useState(
+    initialValues.CameraPointList
+  );
+  const [Navigations, setNavigations] = React.useState(
+    initialValues.Navigations
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setType(initialValues.type);
     setTemplate(initialValues.template);
     setTemplateName(initialValues.templateName);
     setThumbnail(initialValues.thumbnail);
+    setModel(initialValues.model);
     setVideos(initialValues.videos);
     setCurrentVideosValue("");
+    setCameraPointList(initialValues.CameraPointList);
+    setCurrentCameraPointListValue("");
+    setNavigations(initialValues.Navigations);
     setErrors({});
   };
   const [currentVideosValue, setCurrentVideosValue] = React.useState("");
   const videosRef = React.createRef();
+  const [currentCameraPointListValue, setCurrentCameraPointListValue] =
+    React.useState("");
+  const CameraPointListRef = React.createRef();
   const validations = {
-    type: [],
     template: [],
     templateName: [],
     thumbnail: [],
+    model: [],
     videos: [],
+    CameraPointList: [],
+    Navigations: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -243,11 +259,13 @@ export default function RoomDataCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          type,
           template,
           templateName,
           thumbnail,
+          model,
           videos,
+          CameraPointList,
+          Navigations,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -302,63 +320,21 @@ export default function RoomDataCreateForm(props) {
       {...rest}
     >
       <SelectField
-        label="Type"
+        label="Template"
         placeholder="Please select an option"
         isDisabled={false}
-        value={type}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              type: value,
-              template,
-              templateName,
-              thumbnail,
-              videos,
-            };
-            const result = onChange(modelFields);
-            value = result?.type ?? value;
-          }
-          if (errors.type?.hasError) {
-            runValidationTasks("type", value);
-          }
-          setType(value);
-        }}
-        onBlur={() => runValidationTasks("type", type)}
-        errorMessage={errors.type?.errorMessage}
-        hasError={errors.type?.hasError}
-        {...getOverrideProps(overrides, "type")}
-      >
-        <option
-          children="Room"
-          value="Room"
-          {...getOverrideProps(overrides, "typeoption0")}
-        ></option>
-        <option
-          children="Demo"
-          value="Demo"
-          {...getOverrideProps(overrides, "typeoption1")}
-        ></option>
-        <option
-          children="Item"
-          value="Item"
-          {...getOverrideProps(overrides, "typeoption2")}
-        ></option>
-      </SelectField>
-      <TextField
-        label="Template"
-        isRequired={false}
-        isReadOnly={false}
         value={template}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              type,
               template: value,
               templateName,
               thumbnail,
+              model,
               videos,
+              CameraPointList,
+              Navigations,
             };
             const result = onChange(modelFields);
             value = result?.template ?? value;
@@ -372,7 +348,43 @@ export default function RoomDataCreateForm(props) {
         errorMessage={errors.template?.errorMessage}
         hasError={errors.template?.hasError}
         {...getOverrideProps(overrides, "template")}
-      ></TextField>
+      >
+        <option
+          children="Threesixo view"
+          value="ThreesixoView"
+          {...getOverrideProps(overrides, "templateoption0")}
+        ></option>
+        <option
+          children="Map view"
+          value="MapView"
+          {...getOverrideProps(overrides, "templateoption1")}
+        ></option>
+        <option
+          children="Map video view"
+          value="MapVideoView"
+          {...getOverrideProps(overrides, "templateoption2")}
+        ></option>
+        <option
+          children="Mono view"
+          value="MonoView"
+          {...getOverrideProps(overrides, "templateoption3")}
+        ></option>
+        <option
+          children="Multi angle view"
+          value="MultiAngleView"
+          {...getOverrideProps(overrides, "templateoption4")}
+        ></option>
+        <option
+          children="Path view"
+          value="PathView"
+          {...getOverrideProps(overrides, "templateoption5")}
+        ></option>
+        <option
+          children="Sync view"
+          value="SyncView"
+          {...getOverrideProps(overrides, "templateoption6")}
+        ></option>
+      </SelectField>
       <TextField
         label="Template name"
         isRequired={false}
@@ -382,11 +394,13 @@ export default function RoomDataCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              type,
               template,
               templateName: value,
               thumbnail,
+              model,
               videos,
+              CameraPointList,
+              Navigations,
             };
             const result = onChange(modelFields);
             value = result?.templateName ?? value;
@@ -410,11 +424,13 @@ export default function RoomDataCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              type,
               template,
               templateName,
               thumbnail: value,
+              model,
               videos,
+              CameraPointList,
+              Navigations,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -429,16 +445,48 @@ export default function RoomDataCreateForm(props) {
         hasError={errors.thumbnail?.hasError}
         {...getOverrideProps(overrides, "thumbnail")}
       ></TextField>
+      <TextField
+        label="Model"
+        isRequired={false}
+        isReadOnly={false}
+        value={model}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              template,
+              templateName,
+              thumbnail,
+              model: value,
+              videos,
+              CameraPointList,
+              Navigations,
+            };
+            const result = onChange(modelFields);
+            value = result?.model ?? value;
+          }
+          if (errors.model?.hasError) {
+            runValidationTasks("model", value);
+          }
+          setModel(value);
+        }}
+        onBlur={() => runValidationTasks("model", model)}
+        errorMessage={errors.model?.errorMessage}
+        hasError={errors.model?.hasError}
+        {...getOverrideProps(overrides, "model")}
+      ></TextField>
       <ArrayField
         onChange={async (items) => {
           let values = items;
           if (onChange) {
             const modelFields = {
-              type,
               template,
               templateName,
               thumbnail,
+              model,
               videos: values,
+              CameraPointList,
+              Navigations,
             };
             const result = onChange(modelFields);
             values = result?.videos ?? values;
@@ -478,6 +526,92 @@ export default function RoomDataCreateForm(props) {
           {...getOverrideProps(overrides, "videos")}
         ></TextField>
       </ArrayField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              template,
+              templateName,
+              thumbnail,
+              model,
+              videos,
+              CameraPointList: values,
+              Navigations,
+            };
+            const result = onChange(modelFields);
+            values = result?.CameraPointList ?? values;
+          }
+          setCameraPointList(values);
+          setCurrentCameraPointListValue("");
+        }}
+        currentFieldValue={currentCameraPointListValue}
+        label={"Camera point list"}
+        items={CameraPointList}
+        hasError={errors?.CameraPointList?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks(
+            "CameraPointList",
+            currentCameraPointListValue
+          )
+        }
+        errorMessage={errors?.CameraPointList?.errorMessage}
+        setFieldValue={setCurrentCameraPointListValue}
+        inputFieldRef={CameraPointListRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Camera point list"
+          isRequired={false}
+          isReadOnly={false}
+          value={currentCameraPointListValue}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.CameraPointList?.hasError) {
+              runValidationTasks("CameraPointList", value);
+            }
+            setCurrentCameraPointListValue(value);
+          }}
+          onBlur={() =>
+            runValidationTasks("CameraPointList", currentCameraPointListValue)
+          }
+          errorMessage={errors.CameraPointList?.errorMessage}
+          hasError={errors.CameraPointList?.hasError}
+          ref={CameraPointListRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "CameraPointList")}
+        ></TextField>
+      </ArrayField>
+      <TextField
+        label="Navigations"
+        isRequired={false}
+        isReadOnly={false}
+        value={Navigations}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              template,
+              templateName,
+              thumbnail,
+              model,
+              videos,
+              CameraPointList,
+              Navigations: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.Navigations ?? value;
+          }
+          if (errors.Navigations?.hasError) {
+            runValidationTasks("Navigations", value);
+          }
+          setNavigations(value);
+        }}
+        onBlur={() => runValidationTasks("Navigations", Navigations)}
+        errorMessage={errors.Navigations?.errorMessage}
+        hasError={errors.Navigations?.hasError}
+        {...getOverrideProps(overrides, "Navigations")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

@@ -20,15 +20,24 @@ export default function NavigationUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    templateId: "",
+    order: "",
     text: "",
+    src: "",
   };
+  const [templateId, setTemplateId] = React.useState(initialValues.templateId);
+  const [order, setOrder] = React.useState(initialValues.order);
   const [text, setText] = React.useState(initialValues.text);
+  const [src, setSrc] = React.useState(initialValues.src);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = navigationRecord
       ? { ...initialValues, ...navigationRecord }
       : initialValues;
+    setTemplateId(cleanValues.templateId);
+    setOrder(cleanValues.order);
     setText(cleanValues.text);
+    setSrc(cleanValues.src);
     setErrors({});
   };
   const [navigationRecord, setNavigationRecord] =
@@ -49,7 +58,10 @@ export default function NavigationUpdateForm(props) {
   }, [idProp, navigationModelProp]);
   React.useEffect(resetStateValues, [navigationRecord]);
   const validations = {
+    templateId: [],
+    order: [],
     text: [],
+    src: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -77,7 +89,10 @@ export default function NavigationUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          templateId: templateId ?? null,
+          order: order ?? null,
           text: text ?? null,
+          src: src ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -130,6 +145,64 @@ export default function NavigationUpdateForm(props) {
       {...rest}
     >
       <TextField
+        label="Template id"
+        isRequired={false}
+        isReadOnly={false}
+        value={templateId}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              templateId: value,
+              order,
+              text,
+              src,
+            };
+            const result = onChange(modelFields);
+            value = result?.templateId ?? value;
+          }
+          if (errors.templateId?.hasError) {
+            runValidationTasks("templateId", value);
+          }
+          setTemplateId(value);
+        }}
+        onBlur={() => runValidationTasks("templateId", templateId)}
+        errorMessage={errors.templateId?.errorMessage}
+        hasError={errors.templateId?.hasError}
+        {...getOverrideProps(overrides, "templateId")}
+      ></TextField>
+      <TextField
+        label="Order"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={order}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              templateId,
+              order: value,
+              text,
+              src,
+            };
+            const result = onChange(modelFields);
+            value = result?.order ?? value;
+          }
+          if (errors.order?.hasError) {
+            runValidationTasks("order", value);
+          }
+          setOrder(value);
+        }}
+        onBlur={() => runValidationTasks("order", order)}
+        errorMessage={errors.order?.errorMessage}
+        hasError={errors.order?.hasError}
+        {...getOverrideProps(overrides, "order")}
+      ></TextField>
+      <TextField
         label="Text"
         isRequired={false}
         isReadOnly={false}
@@ -138,7 +211,10 @@ export default function NavigationUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              templateId,
+              order,
               text: value,
+              src,
             };
             const result = onChange(modelFields);
             value = result?.text ?? value;
@@ -152,6 +228,33 @@ export default function NavigationUpdateForm(props) {
         errorMessage={errors.text?.errorMessage}
         hasError={errors.text?.hasError}
         {...getOverrideProps(overrides, "text")}
+      ></TextField>
+      <TextField
+        label="Src"
+        isRequired={false}
+        isReadOnly={false}
+        value={src}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              templateId,
+              order,
+              text,
+              src: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.src ?? value;
+          }
+          if (errors.src?.hasError) {
+            runValidationTasks("src", value);
+          }
+          setSrc(value);
+        }}
+        onBlur={() => runValidationTasks("src", src)}
+        errorMessage={errors.src?.errorMessage}
+        hasError={errors.src?.hasError}
+        {...getOverrideProps(overrides, "src")}
       ></TextField>
       <Flex
         justifyContent="space-between"

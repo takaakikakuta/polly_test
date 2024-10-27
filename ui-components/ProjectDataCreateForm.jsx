@@ -4,9 +4,9 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { createNavigation } from "./graphql/mutations";
+import { createProjectData } from "./graphql/mutations";
 const client = generateClient();
-export default function NavigationCreateForm(props) {
+export default function ProjectDataCreateForm(props) {
   const {
     clearOnSuccess = true,
     onSuccess,
@@ -18,28 +18,22 @@ export default function NavigationCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    projectName: "",
     templateId: "",
-    order: "",
-    text: "",
-    src: "",
   };
+  const [projectName, setProjectName] = React.useState(
+    initialValues.projectName
+  );
   const [templateId, setTemplateId] = React.useState(initialValues.templateId);
-  const [order, setOrder] = React.useState(initialValues.order);
-  const [text, setText] = React.useState(initialValues.text);
-  const [src, setSrc] = React.useState(initialValues.src);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
+    setProjectName(initialValues.projectName);
     setTemplateId(initialValues.templateId);
-    setOrder(initialValues.order);
-    setText(initialValues.text);
-    setSrc(initialValues.src);
     setErrors({});
   };
   const validations = {
+    projectName: [],
     templateId: [],
-    order: [],
-    text: [],
-    src: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -67,10 +61,8 @@ export default function NavigationCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          projectName,
           templateId,
-          order,
-          text,
-          src,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -101,7 +93,7 @@ export default function NavigationCreateForm(props) {
             }
           });
           await client.graphql({
-            query: createNavigation.replaceAll("__typename", ""),
+            query: createProjectData.replaceAll("__typename", ""),
             variables: {
               input: {
                 ...modelFields,
@@ -121,9 +113,34 @@ export default function NavigationCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "NavigationCreateForm")}
+      {...getOverrideProps(overrides, "ProjectDataCreateForm")}
       {...rest}
     >
+      <TextField
+        label="Project name"
+        isRequired={false}
+        isReadOnly={false}
+        value={projectName}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              projectName: value,
+              templateId,
+            };
+            const result = onChange(modelFields);
+            value = result?.projectName ?? value;
+          }
+          if (errors.projectName?.hasError) {
+            runValidationTasks("projectName", value);
+          }
+          setProjectName(value);
+        }}
+        onBlur={() => runValidationTasks("projectName", projectName)}
+        errorMessage={errors.projectName?.errorMessage}
+        hasError={errors.projectName?.hasError}
+        {...getOverrideProps(overrides, "projectName")}
+      ></TextField>
       <TextField
         label="Template id"
         isRequired={false}
@@ -133,10 +150,8 @@ export default function NavigationCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              projectName,
               templateId: value,
-              order,
-              text,
-              src,
             };
             const result = onChange(modelFields);
             value = result?.templateId ?? value;
@@ -150,91 +165,6 @@ export default function NavigationCreateForm(props) {
         errorMessage={errors.templateId?.errorMessage}
         hasError={errors.templateId?.hasError}
         {...getOverrideProps(overrides, "templateId")}
-      ></TextField>
-      <TextField
-        label="Order"
-        isRequired={false}
-        isReadOnly={false}
-        type="number"
-        step="any"
-        value={order}
-        onChange={(e) => {
-          let value = isNaN(parseInt(e.target.value))
-            ? e.target.value
-            : parseInt(e.target.value);
-          if (onChange) {
-            const modelFields = {
-              templateId,
-              order: value,
-              text,
-              src,
-            };
-            const result = onChange(modelFields);
-            value = result?.order ?? value;
-          }
-          if (errors.order?.hasError) {
-            runValidationTasks("order", value);
-          }
-          setOrder(value);
-        }}
-        onBlur={() => runValidationTasks("order", order)}
-        errorMessage={errors.order?.errorMessage}
-        hasError={errors.order?.hasError}
-        {...getOverrideProps(overrides, "order")}
-      ></TextField>
-      <TextField
-        label="Text"
-        isRequired={false}
-        isReadOnly={false}
-        value={text}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              templateId,
-              order,
-              text: value,
-              src,
-            };
-            const result = onChange(modelFields);
-            value = result?.text ?? value;
-          }
-          if (errors.text?.hasError) {
-            runValidationTasks("text", value);
-          }
-          setText(value);
-        }}
-        onBlur={() => runValidationTasks("text", text)}
-        errorMessage={errors.text?.errorMessage}
-        hasError={errors.text?.hasError}
-        {...getOverrideProps(overrides, "text")}
-      ></TextField>
-      <TextField
-        label="Src"
-        isRequired={false}
-        isReadOnly={false}
-        value={src}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              templateId,
-              order,
-              text,
-              src: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.src ?? value;
-          }
-          if (errors.src?.hasError) {
-            runValidationTasks("src", value);
-          }
-          setSrc(value);
-        }}
-        onBlur={() => runValidationTasks("src", src)}
-        errorMessage={errors.src?.errorMessage}
-        hasError={errors.src?.hasError}
-        {...getOverrideProps(overrides, "src")}
       ></TextField>
       <Flex
         justifyContent="space-between"

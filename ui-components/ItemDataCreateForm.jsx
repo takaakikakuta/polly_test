@@ -9,15 +9,13 @@ import {
   Grid,
   Icon,
   ScrollView,
-  SelectField,
   Text,
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { getRoomData } from "./graphql/queries";
-import { updateRoomData } from "./graphql/mutations";
+import { createItemData } from "./graphql/mutations";
 const client = generateClient();
 function ArrayField({
   items = [],
@@ -174,10 +172,9 @@ function ArrayField({
     </React.Fragment>
   );
 }
-export default function RoomDataUpdateForm(props) {
+export default function ItemDataCreateForm(props) {
   const {
-    id: idProp,
-    roomData: roomDataModelProp,
+    clearOnSuccess = true,
     onSuccess,
     onError,
     onSubmit,
@@ -190,68 +187,39 @@ export default function RoomDataUpdateForm(props) {
     template: "",
     templateName: "",
     thumbnail: "",
-    model: "",
     videos: [],
-    CameraPointList: [],
-    Navigations: "",
+    Navigations: [],
   };
   const [template, setTemplate] = React.useState(initialValues.template);
   const [templateName, setTemplateName] = React.useState(
     initialValues.templateName
   );
   const [thumbnail, setThumbnail] = React.useState(initialValues.thumbnail);
-  const [model, setModel] = React.useState(initialValues.model);
   const [videos, setVideos] = React.useState(initialValues.videos);
-  const [CameraPointList, setCameraPointList] = React.useState(
-    initialValues.CameraPointList
-  );
   const [Navigations, setNavigations] = React.useState(
     initialValues.Navigations
   );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    const cleanValues = roomDataRecord
-      ? { ...initialValues, ...roomDataRecord }
-      : initialValues;
-    setTemplate(cleanValues.template);
-    setTemplateName(cleanValues.templateName);
-    setThumbnail(cleanValues.thumbnail);
-    setModel(cleanValues.model);
-    setVideos(cleanValues.videos ?? []);
+    setTemplate(initialValues.template);
+    setTemplateName(initialValues.templateName);
+    setThumbnail(initialValues.thumbnail);
+    setVideos(initialValues.videos);
     setCurrentVideosValue("");
-    setCameraPointList(cleanValues.CameraPointList ?? []);
-    setCurrentCameraPointListValue("");
-    setNavigations(cleanValues.Navigations);
+    setNavigations(initialValues.Navigations);
+    setCurrentNavigationsValue("");
     setErrors({});
   };
-  const [roomDataRecord, setRoomDataRecord] = React.useState(roomDataModelProp);
-  React.useEffect(() => {
-    const queryData = async () => {
-      const record = idProp
-        ? (
-            await client.graphql({
-              query: getRoomData.replaceAll("__typename", ""),
-              variables: { id: idProp },
-            })
-          )?.data?.getRoomData
-        : roomDataModelProp;
-      setRoomDataRecord(record);
-    };
-    queryData();
-  }, [idProp, roomDataModelProp]);
-  React.useEffect(resetStateValues, [roomDataRecord]);
   const [currentVideosValue, setCurrentVideosValue] = React.useState("");
   const videosRef = React.createRef();
-  const [currentCameraPointListValue, setCurrentCameraPointListValue] =
+  const [currentNavigationsValue, setCurrentNavigationsValue] =
     React.useState("");
-  const CameraPointListRef = React.createRef();
+  const NavigationsRef = React.createRef();
   const validations = {
     template: [],
     templateName: [],
     thumbnail: [],
-    model: [],
     videos: [],
-    CameraPointList: [],
     Navigations: [],
   };
   const runValidationTasks = async (
@@ -280,13 +248,11 @@ export default function RoomDataUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          template: template ?? null,
-          templateName: templateName ?? null,
-          thumbnail: thumbnail ?? null,
-          model: model ?? null,
-          videos: videos ?? null,
-          CameraPointList: CameraPointList ?? null,
-          Navigations: Navigations ?? null,
+          template,
+          templateName,
+          thumbnail,
+          videos,
+          Navigations,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -317,16 +283,18 @@ export default function RoomDataUpdateForm(props) {
             }
           });
           await client.graphql({
-            query: updateRoomData.replaceAll("__typename", ""),
+            query: createItemData.replaceAll("__typename", ""),
             variables: {
               input: {
-                id: roomDataRecord.id,
                 ...modelFields,
               },
             },
           });
           if (onSuccess) {
             onSuccess(modelFields);
+          }
+          if (clearOnSuccess) {
+            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -335,13 +303,13 @@ export default function RoomDataUpdateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "RoomDataUpdateForm")}
+      {...getOverrideProps(overrides, "ItemDataCreateForm")}
       {...rest}
     >
-      <SelectField
+      <TextField
         label="Template"
-        placeholder="Please select an option"
-        isDisabled={false}
+        isRequired={false}
+        isReadOnly={false}
         value={template}
         onChange={(e) => {
           let { value } = e.target;
@@ -350,9 +318,7 @@ export default function RoomDataUpdateForm(props) {
               template: value,
               templateName,
               thumbnail,
-              model,
               videos,
-              CameraPointList,
               Navigations,
             };
             const result = onChange(modelFields);
@@ -367,43 +333,7 @@ export default function RoomDataUpdateForm(props) {
         errorMessage={errors.template?.errorMessage}
         hasError={errors.template?.hasError}
         {...getOverrideProps(overrides, "template")}
-      >
-        <option
-          children="Threesixo view"
-          value="ThreesixoView"
-          {...getOverrideProps(overrides, "templateoption0")}
-        ></option>
-        <option
-          children="Map view"
-          value="MapView"
-          {...getOverrideProps(overrides, "templateoption1")}
-        ></option>
-        <option
-          children="Map video view"
-          value="MapVideoView"
-          {...getOverrideProps(overrides, "templateoption2")}
-        ></option>
-        <option
-          children="Mono view"
-          value="MonoView"
-          {...getOverrideProps(overrides, "templateoption3")}
-        ></option>
-        <option
-          children="Multi angle view"
-          value="MultiAngleView"
-          {...getOverrideProps(overrides, "templateoption4")}
-        ></option>
-        <option
-          children="Path view"
-          value="PathView"
-          {...getOverrideProps(overrides, "templateoption5")}
-        ></option>
-        <option
-          children="Sync view"
-          value="SyncView"
-          {...getOverrideProps(overrides, "templateoption6")}
-        ></option>
-      </SelectField>
+      ></TextField>
       <TextField
         label="Template name"
         isRequired={false}
@@ -416,9 +346,7 @@ export default function RoomDataUpdateForm(props) {
               template,
               templateName: value,
               thumbnail,
-              model,
               videos,
-              CameraPointList,
               Navigations,
             };
             const result = onChange(modelFields);
@@ -446,9 +374,7 @@ export default function RoomDataUpdateForm(props) {
               template,
               templateName,
               thumbnail: value,
-              model,
               videos,
-              CameraPointList,
               Navigations,
             };
             const result = onChange(modelFields);
@@ -464,36 +390,6 @@ export default function RoomDataUpdateForm(props) {
         hasError={errors.thumbnail?.hasError}
         {...getOverrideProps(overrides, "thumbnail")}
       ></TextField>
-      <TextField
-        label="Model"
-        isRequired={false}
-        isReadOnly={false}
-        value={model}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              template,
-              templateName,
-              thumbnail,
-              model: value,
-              videos,
-              CameraPointList,
-              Navigations,
-            };
-            const result = onChange(modelFields);
-            value = result?.model ?? value;
-          }
-          if (errors.model?.hasError) {
-            runValidationTasks("model", value);
-          }
-          setModel(value);
-        }}
-        onBlur={() => runValidationTasks("model", model)}
-        errorMessage={errors.model?.errorMessage}
-        hasError={errors.model?.hasError}
-        {...getOverrideProps(overrides, "model")}
-      ></TextField>
       <ArrayField
         onChange={async (items) => {
           let values = items;
@@ -502,9 +398,7 @@ export default function RoomDataUpdateForm(props) {
               template,
               templateName,
               thumbnail,
-              model,
               videos: values,
-              CameraPointList,
               Navigations,
             };
             const result = onChange(modelFields);
@@ -553,97 +447,61 @@ export default function RoomDataUpdateForm(props) {
               template,
               templateName,
               thumbnail,
-              model,
               videos,
-              CameraPointList: values,
-              Navigations,
+              Navigations: values,
             };
             const result = onChange(modelFields);
-            values = result?.CameraPointList ?? values;
+            values = result?.Navigations ?? values;
           }
-          setCameraPointList(values);
-          setCurrentCameraPointListValue("");
+          setNavigations(values);
+          setCurrentNavigationsValue("");
         }}
-        currentFieldValue={currentCameraPointListValue}
-        label={"Camera point list"}
-        items={CameraPointList}
-        hasError={errors?.CameraPointList?.hasError}
+        currentFieldValue={currentNavigationsValue}
+        label={"Navigations"}
+        items={Navigations}
+        hasError={errors?.Navigations?.hasError}
         runValidationTasks={async () =>
-          await runValidationTasks(
-            "CameraPointList",
-            currentCameraPointListValue
-          )
+          await runValidationTasks("Navigations", currentNavigationsValue)
         }
-        errorMessage={errors?.CameraPointList?.errorMessage}
-        setFieldValue={setCurrentCameraPointListValue}
-        inputFieldRef={CameraPointListRef}
+        errorMessage={errors?.Navigations?.errorMessage}
+        setFieldValue={setCurrentNavigationsValue}
+        inputFieldRef={NavigationsRef}
         defaultFieldValue={""}
       >
         <TextField
-          label="Camera point list"
+          label="Navigations"
           isRequired={false}
           isReadOnly={false}
-          value={currentCameraPointListValue}
+          value={currentNavigationsValue}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.CameraPointList?.hasError) {
-              runValidationTasks("CameraPointList", value);
+            if (errors.Navigations?.hasError) {
+              runValidationTasks("Navigations", value);
             }
-            setCurrentCameraPointListValue(value);
+            setCurrentNavigationsValue(value);
           }}
           onBlur={() =>
-            runValidationTasks("CameraPointList", currentCameraPointListValue)
+            runValidationTasks("Navigations", currentNavigationsValue)
           }
-          errorMessage={errors.CameraPointList?.errorMessage}
-          hasError={errors.CameraPointList?.hasError}
-          ref={CameraPointListRef}
+          errorMessage={errors.Navigations?.errorMessage}
+          hasError={errors.Navigations?.hasError}
+          ref={NavigationsRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "CameraPointList")}
+          {...getOverrideProps(overrides, "Navigations")}
         ></TextField>
       </ArrayField>
-      <TextField
-        label="Navigations"
-        isRequired={false}
-        isReadOnly={false}
-        value={Navigations}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              template,
-              templateName,
-              thumbnail,
-              model,
-              videos,
-              CameraPointList,
-              Navigations: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.Navigations ?? value;
-          }
-          if (errors.Navigations?.hasError) {
-            runValidationTasks("Navigations", value);
-          }
-          setNavigations(value);
-        }}
-        onBlur={() => runValidationTasks("Navigations", Navigations)}
-        errorMessage={errors.Navigations?.errorMessage}
-        hasError={errors.Navigations?.hasError}
-        {...getOverrideProps(overrides, "Navigations")}
-      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Reset"
+          children="Clear"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          isDisabled={!(idProp || roomDataModelProp)}
-          {...getOverrideProps(overrides, "ResetButton")}
+          {...getOverrideProps(overrides, "ClearButton")}
         ></Button>
         <Flex
           gap="15px"
@@ -653,10 +511,7 @@ export default function RoomDataUpdateForm(props) {
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={
-              !(idProp || roomDataModelProp) ||
-              Object.values(errors).some((e) => e?.hasError)
-            }
+            isDisabled={Object.values(errors).some((e) => e?.hasError)}
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>

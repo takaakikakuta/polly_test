@@ -17,15 +17,24 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type NavigationUpdateFormInputValues = {
+    templateId?: string;
+    order?: number;
     text?: string;
+    src?: string;
 };
 export declare type NavigationUpdateFormValidationValues = {
+    templateId?: ValidationFunction<string>;
+    order?: ValidationFunction<number>;
     text?: ValidationFunction<string>;
+    src?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type NavigationUpdateFormOverridesProps = {
     NavigationUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    templateId?: PrimitiveOverrideProps<TextFieldProps>;
+    order?: PrimitiveOverrideProps<TextFieldProps>;
     text?: PrimitiveOverrideProps<TextFieldProps>;
+    src?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type NavigationUpdateFormProps = React.PropsWithChildren<{
     overrides?: NavigationUpdateFormOverridesProps | undefined | null;

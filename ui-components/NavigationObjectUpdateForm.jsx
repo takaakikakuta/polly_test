@@ -4,11 +4,13 @@ import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { createNavigation } from "./graphql/mutations";
+import { getNavigationObject } from "./graphql/queries";
+import { updateNavigationObject } from "./graphql/mutations";
 const client = generateClient();
-export default function NavigationCreateForm(props) {
+export default function NavigationObjectUpdateForm(props) {
   const {
-    clearOnSuccess = true,
+    id: idProp,
+    navigationObject: navigationObjectModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -18,28 +20,45 @@ export default function NavigationCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    templateId: "",
+    id: "",
     order: "",
-    text: "",
-    src: "",
+    Navgation: "",
   };
-  const [templateId, setTemplateId] = React.useState(initialValues.templateId);
+  const [id, setId] = React.useState(initialValues.id);
   const [order, setOrder] = React.useState(initialValues.order);
-  const [text, setText] = React.useState(initialValues.text);
-  const [src, setSrc] = React.useState(initialValues.src);
+  const [Navgation, setNavgation] = React.useState(initialValues.Navgation);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setTemplateId(initialValues.templateId);
-    setOrder(initialValues.order);
-    setText(initialValues.text);
-    setSrc(initialValues.src);
+    const cleanValues = navigationObjectRecord
+      ? { ...initialValues, ...navigationObjectRecord }
+      : initialValues;
+    setId(cleanValues.id);
+    setOrder(cleanValues.order);
+    setNavgation(cleanValues.Navgation);
     setErrors({});
   };
+  const [navigationObjectRecord, setNavigationObjectRecord] = React.useState(
+    navigationObjectModelProp
+  );
+  React.useEffect(() => {
+    const queryData = async () => {
+      const record = idProp
+        ? (
+            await client.graphql({
+              query: getNavigationObject.replaceAll("__typename", ""),
+              variables: { id: idProp },
+            })
+          )?.data?.getNavigationObject
+        : navigationObjectModelProp;
+      setNavigationObjectRecord(record);
+    };
+    queryData();
+  }, [idProp, navigationObjectModelProp]);
+  React.useEffect(resetStateValues, [navigationObjectRecord]);
   const validations = {
-    templateId: [],
+    id: [{ type: "Required" }],
     order: [],
-    text: [],
-    src: [],
+    Navgation: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -67,10 +86,9 @@ export default function NavigationCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          templateId,
-          order,
-          text,
-          src,
+          id,
+          order: order ?? null,
+          Navgation: Navgation ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -101,18 +119,16 @@ export default function NavigationCreateForm(props) {
             }
           });
           await client.graphql({
-            query: createNavigation.replaceAll("__typename", ""),
+            query: updateNavigationObject.replaceAll("__typename", ""),
             variables: {
               input: {
+                id: navigationObjectRecord.id,
                 ...modelFields,
               },
             },
           });
           if (onSuccess) {
             onSuccess(modelFields);
-          }
-          if (clearOnSuccess) {
-            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -121,35 +137,34 @@ export default function NavigationCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "NavigationCreateForm")}
+      {...getOverrideProps(overrides, "NavigationObjectUpdateForm")}
       {...rest}
     >
       <TextField
-        label="Template id"
-        isRequired={false}
-        isReadOnly={false}
-        value={templateId}
+        label="Id"
+        isRequired={true}
+        isReadOnly={true}
+        value={id}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              templateId: value,
+              id: value,
               order,
-              text,
-              src,
+              Navgation,
             };
             const result = onChange(modelFields);
-            value = result?.templateId ?? value;
+            value = result?.id ?? value;
           }
-          if (errors.templateId?.hasError) {
-            runValidationTasks("templateId", value);
+          if (errors.id?.hasError) {
+            runValidationTasks("id", value);
           }
-          setTemplateId(value);
+          setId(value);
         }}
-        onBlur={() => runValidationTasks("templateId", templateId)}
-        errorMessage={errors.templateId?.errorMessage}
-        hasError={errors.templateId?.hasError}
-        {...getOverrideProps(overrides, "templateId")}
+        onBlur={() => runValidationTasks("id", id)}
+        errorMessage={errors.id?.errorMessage}
+        hasError={errors.id?.hasError}
+        {...getOverrideProps(overrides, "id")}
       ></TextField>
       <TextField
         label="Order"
@@ -164,10 +179,9 @@ export default function NavigationCreateForm(props) {
             : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
-              templateId,
+              id,
               order: value,
-              text,
-              src,
+              Navgation,
             };
             const result = onChange(modelFields);
             value = result?.order ?? value;
@@ -183,71 +197,44 @@ export default function NavigationCreateForm(props) {
         {...getOverrideProps(overrides, "order")}
       ></TextField>
       <TextField
-        label="Text"
+        label="Navgation"
         isRequired={false}
         isReadOnly={false}
-        value={text}
+        value={Navgation}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              templateId,
+              id,
               order,
-              text: value,
-              src,
+              Navgation: value,
             };
             const result = onChange(modelFields);
-            value = result?.text ?? value;
+            value = result?.Navgation ?? value;
           }
-          if (errors.text?.hasError) {
-            runValidationTasks("text", value);
+          if (errors.Navgation?.hasError) {
+            runValidationTasks("Navgation", value);
           }
-          setText(value);
+          setNavgation(value);
         }}
-        onBlur={() => runValidationTasks("text", text)}
-        errorMessage={errors.text?.errorMessage}
-        hasError={errors.text?.hasError}
-        {...getOverrideProps(overrides, "text")}
-      ></TextField>
-      <TextField
-        label="Src"
-        isRequired={false}
-        isReadOnly={false}
-        value={src}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              templateId,
-              order,
-              text,
-              src: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.src ?? value;
-          }
-          if (errors.src?.hasError) {
-            runValidationTasks("src", value);
-          }
-          setSrc(value);
-        }}
-        onBlur={() => runValidationTasks("src", src)}
-        errorMessage={errors.src?.errorMessage}
-        hasError={errors.src?.hasError}
-        {...getOverrideProps(overrides, "src")}
+        onBlur={() => runValidationTasks("Navgation", Navgation)}
+        errorMessage={errors.Navgation?.errorMessage}
+        hasError={errors.Navgation?.hasError}
+        {...getOverrideProps(overrides, "Navgation")}
       ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Clear"
+          children="Reset"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          {...getOverrideProps(overrides, "ClearButton")}
+          isDisabled={!(idProp || navigationObjectModelProp)}
+          {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
           gap="15px"
@@ -257,7 +244,10 @@ export default function NavigationCreateForm(props) {
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={Object.values(errors).some((e) => e?.hasError)}
+            isDisabled={
+              !(idProp || navigationObjectModelProp) ||
+              Object.values(errors).some((e) => e?.hasError)
+            }
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>
