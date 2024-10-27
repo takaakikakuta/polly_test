@@ -12,7 +12,7 @@ export const convertTextToSpeech = defineFunction({
 });
 
 const schema = a.schema({
-  viewSetting: a.enum([
+  ViewSetting: a.enum([
     'ThreesixoView',
     'MapView',
     'MapVideoView',
@@ -32,9 +32,9 @@ const schema = a.schema({
 
   MapData:a
     .model({
-      template:a.ref('viewSetting'),
+      template:a.ref('ViewSetting'),
       templateName:a.string(),
-      selectView:a.ref('viewSetting'),
+      selectView:a.ref('ViewSetting'),
       thumbnail:a.string(),
       RoomList:a.string().array(),
       DemoList:a.string().array(),
@@ -44,7 +44,7 @@ const schema = a.schema({
 
   RoomData:a
     .model({
-      template:a.ref('viewSetting'),
+      template:a.ref('ViewSetting'),
       templateName:a.string(),
       thumbnail:a.string(),
       model:a.string(),
@@ -56,7 +56,7 @@ const schema = a.schema({
 
   DemoData:a
     .model({
-      template:a.ref('viewSetting'),
+      template:a.ref('ViewSetting'),
       templateName:a.string(),
       thumbnail:a.string(),
       videos:a.string().array(),
