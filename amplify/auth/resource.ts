@@ -1,6 +1,5 @@
 import { defineAuth } from '@aws-amplify/backend';
 import {addUserToGroup} from "../data/add-user-to-group/resource";
-import { postConfirmation } from "./post-confirmation/resource"
 import {listUsers} from "../data/list-users/resource";
 
 
