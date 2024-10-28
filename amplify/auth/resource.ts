@@ -12,6 +12,12 @@ export const auth = defineAuth({
     email: true,
   },
   groups:["ADMINS", "PAIDUSERS","TRIAL"],
+  userAttributes: {
+    "custom:tenant_id": {
+      dataType: "String",
+      mutable: true,
+    },
+  },
   access: (allow) => [
     allow.resource(addUserToGroup).to(["addUserToGroup"]),
     allow.resource(listUsers).to(["manageUsers"]),

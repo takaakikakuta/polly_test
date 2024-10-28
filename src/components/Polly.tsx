@@ -11,6 +11,7 @@ import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import { useState } from "react";
+import { CfnDataflowEndpointGroup } from 'aws-cdk-lib/aws-groundstation';
 
 const client = generateClient<Schema>();
 
@@ -21,26 +22,20 @@ const Polly = () => {
     const [src, setSrc] = useState("");
     const [file, setFile] = useState<PollyReturnType>("");
     const [navis, setNavis] = useState<Schema["Navigation"]["type"][]>([]);
+    const [srcUrls, setSrcUrls] = useState<{ [key: string]: string }>({});
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
 
 
     const handleSave = async () => {
-      // 保存処理（例：APIコールなど）をここに記述
       await client.models.Navigation.create({
-          text: text,
-        })
-  
-      // テキストフィールドをクリア
-      setText('');
-    };
-
-    const fetchTodos = async () => {
-      const { data: items, errors } = await client.models.Navigation.list();
-      setNavis(items);
-      console.log(items);
+        text,
+        src:"public/" + file,
+      })
+      setText("")
+      setSrc("")     
       
-    };
+    }
 
     useEffect(() => {
       const sub = client.models.Navigation.observeQuery().subscribe({
@@ -52,6 +47,28 @@ const Polly = () => {
       console.log(navis);
       return () => sub.unsubscribe();
     }, []);
+
+    useEffect(() => {
+      const fetchUrls = async () => {
+        const urls: { [key: string]: string } = {}; // 型を指定
+        for (const navi of navis) {
+          if (navi.src) {  // srcが存在するか確認
+            try {
+              const res  = await getUrl({ path: navi.src });
+              urls[navi.id] = res.url.toString();
+            } catch (error) {
+              console.error("Error fetching URL:", error);
+            }
+          } else {
+            console.warn(`No src provided for navi with id ${navi.id}`);
+          }
+        }
+        setSrcUrls(urls);
+        console.log(urls);
+      };
+      fetchUrls();
+      
+    }, [navis]);
 
 
     const deleteNavi = (id:string) =>{
@@ -85,6 +102,7 @@ const Polly = () => {
             });
 
             if (!errors && data) {
+              // dataを保存して毎回getUrlで生成だな
               setFile(data);
 
               // 2. 変換後のファイルが取得できたら、そのURLを取得
@@ -109,32 +127,33 @@ const Polly = () => {
         </audio>
       )}
         <button 
-            onClick={async () => {
-              await client.models.Navigation.create({
-                text,
-                src,
-              })
-              setText("")
-              setSrc("")     
-              
-            }}>保存</button>
+            onClick={handleSave}>保存</button>
         <ul>
-        {navis.map(({ id, text, src }) => (
-            
-                <li key={id} className='flex space-x-5 my-4'>
-                    <p className="p-2">{text}</p>
-                    <a onClick={()=>playAudio(src as string)} className='p-2 bg-blue-300'>再生</a>
-                    {src && (
-                      <audio ref={audioRef} controls className='hidden'>
-                        <source src={src} type="audio/mpeg" />
-                      </audio>
-                    )}
-                    <a className="mx-auto" href={src as string}>試聴する</a>
-                    <a href={`NavigationEdit/${id}`} className='p-2 bg-yellow-300'>編集</a>
-                    <a className='p-2 bg-red-300' onClick={()=>deleteNavi(id)}>削除</a>
-                </li>
-                
-        ))}
+        {navis.map(({ id, text }) => (
+        <li key={id} className="flex space-x-5 my-4 border-2 items-center">
+          <p className="p-2">{text}</p>
+          <a
+            onClick={() => playAudio(srcUrls[id])}
+            className="p-2 bg-blue-300"
+          >
+            再生
+          </a>
+          {srcUrls[id] && (
+            <audio ref={audioRef} controls className="hidden">
+              <source src={srcUrls[id]} type="audio/mpeg" />
+            </audio>
+          )}
+          <a href={`NavigationEdit/${id}`} className="p-2 bg-yellow-300">
+            編集
+          </a>
+          <a
+            className="p-2 bg-red-300"
+            onClick={() => deleteNavi(id)}
+          >
+            削除
+          </a>
+        </li>
+      ))}
       </ul>
       </div>
     );

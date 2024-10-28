@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useParams } from 'next/navigation';
 import { ItemBatcher } from 'aws-cdk-lib/aws-stepfunctions';
 
+
 const client = generateClient<Schema>();
 
 type PollyReturnType = Schema["convertTextToSpeech"]["returnType"];
@@ -21,6 +22,7 @@ type PollyReturnType = Schema["convertTextToSpeech"]["returnType"];
 const page = () => {
   const { id } = useParams(); // パラメータを取得
   const [navi, setNavi] = useState<Schema["Navigation"]["type"]>();
+  const [srcUrl, setSrcUrl] = useState<{ [key: string]: string }>({});
 
   const getNavigation = async () => {
     if (typeof id === 'string') {
@@ -35,12 +37,35 @@ const page = () => {
     getNavigation();
   }, []);
 
+  useEffect(() => {
+    const fetchUrls = async () => {
+      const urls: { [key: string]: string } = {}; // 型を指定
+     
+        if (navi?.src) {  // srcが存在するか確認
+          try {
+            const res  = await getUrl({ path: navi.src });
+            urls[navi.id] = res.url.toString();
+          } catch (error) {
+            console.error("Error fetching URL:", error);
+          }
+        } else {
+          console.warn(`No src provided for navi with id ${navi?.id}`);
+        }
+  
+      setSrcUrl(urls);
+      console.log(urls);
+    };
+    fetchUrls();
+    
+  }, [navi]);
 
+
+  console.log(navi);
   
     
 
   return (
-    <div>
+    <div className='container mx-auto mt-10'>
       <p>Navigationの編集</p>
       {
         navi ?(
@@ -49,7 +74,7 @@ const page = () => {
               <p>テキスト</p>
               <p>{navi.text}</p>
             </div>
-            <a href={navi.src as string}>再生</a>
+            <a href={srcUrl[navi.id]}>再生</a>
           </>
         ) 
         :""
