@@ -13,8 +13,6 @@ Amplify.configure(outputs);
 
 import { Authenticator } from '@aws-amplify/ui-react'
 import '@aws-amplify/ui-react/styles.css'
-import  FileList  from '../../components/list'
-import { getCurrentUser, GetCurrentUserOutput } from 'aws-amplify/auth';
 
 const client = generateClient<Schema>({
     headers: async (requestOptions) => {

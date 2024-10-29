@@ -28,7 +28,7 @@ const schema = a.schema({
       templateId:a.string(),
       Navigations: a.hasMany('ProjectDataNavigation', 'ProjectDataId'),
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   MapData:a
     .model({
@@ -53,7 +53,7 @@ const schema = a.schema({
       CameraPointList:a.string().array(),
       Navigations:a.string()
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   DemoData:a
     .model({
@@ -63,7 +63,7 @@ const schema = a.schema({
       videos:a.string().array(),
       Navigations:a.string().array()
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   ItemData:a
     .model({
@@ -73,7 +73,7 @@ const schema = a.schema({
       videos:a.string().array(),
       Navigations:a.string().array()
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   CameraPointData:a
     .model({
@@ -82,7 +82,7 @@ const schema = a.schema({
       image:a.string(),
       cameraRadian:a.integer(),
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   Navigation: a
     .model({
@@ -92,7 +92,7 @@ const schema = a.schema({
       src:a.string(),
       projectDatas: a.hasMany('ProjectDataNavigation', 'NavigationId'),
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   ProjectDataNavigation: a
     .model({
@@ -101,7 +101,7 @@ const schema = a.schema({
       ProjectData: a.belongsTo('ProjectData', 'ProjectDataId'),
       Navigation: a.belongsTo('Navigation', 'NavigationId'),
     })
-    .authorization(allow => [allow.publicApiKey()]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
 
   convertTextToSpeech: a
     .mutation()
