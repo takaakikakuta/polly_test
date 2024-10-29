@@ -109,7 +109,7 @@ const schema = a.schema({
       text: a.string().required(),
     })
     .returns(a.string().required())
-    .authorization(allow => [allow.publicApiKey()])
+    .authorization(allow => [allow.group("Admin")])
     .handler(a.handler.function(convertTextToSpeech)),
 
   User: a.customType({
@@ -129,7 +129,7 @@ const schema = a.schema({
   listUsers: a
   .query()
   .returns(a.ref("UsersResponse")) // UsersResponse型の返り値
-  .authorization(allow => [allow.publicApiKey()])
+  .authorization(allow => [allow.group("Admin")])
   .handler(a.handler.function(listUsers)),
 
 
@@ -140,7 +140,7 @@ const schema = a.schema({
       groupName: a.string().required(),
     })
     // .authorization((allow) => [allow.group("ADMINS")])
-    .authorization(allow => [allow.publicApiKey()])
+    .authorization(allow => [allow.group("Admin")])
     .handler(a.handler.function(addUserToGroup))
     .returns(a.json())
 });
