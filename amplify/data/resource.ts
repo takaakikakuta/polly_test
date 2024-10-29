@@ -28,7 +28,7 @@ const schema = a.schema({
       templateId:a.string(),
       Navigations: a.hasMany('ProjectDataNavigation', 'ProjectDataId'),
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   MapData:a
     .model({
@@ -41,7 +41,7 @@ const schema = a.schema({
       ItemList:a.string().array(),
       tenantId: a.string(),
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   RoomData:a
     .model({
@@ -53,7 +53,7 @@ const schema = a.schema({
       CameraPointList:a.string().array(),
       Navigations:a.string()
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   DemoData:a
     .model({
@@ -63,7 +63,7 @@ const schema = a.schema({
       videos:a.string().array(),
       Navigations:a.string().array()
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   ItemData:a
     .model({
@@ -73,7 +73,7 @@ const schema = a.schema({
       videos:a.string().array(),
       Navigations:a.string().array()
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   CameraPointData:a
     .model({
@@ -82,7 +82,7 @@ const schema = a.schema({
       image:a.string(),
       cameraRadian:a.integer(),
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   Navigation: a
     .model({
@@ -92,7 +92,7 @@ const schema = a.schema({
       src:a.string(),
       projectDatas: a.hasMany('ProjectDataNavigation', 'NavigationId'),
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   ProjectDataNavigation: a
     .model({
@@ -101,7 +101,7 @@ const schema = a.schema({
       ProjectData: a.belongsTo('ProjectData', 'ProjectDataId'),
       Navigation: a.belongsTo('Navigation', 'NavigationId'),
     })
-    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenantId')]),
+    .authorization(allow => [allow.ownerDefinedIn('tenantId').identityClaim('custom:tenant_id')]),
 
   convertTextToSpeech: a
     .mutation()
