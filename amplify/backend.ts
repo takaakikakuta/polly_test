@@ -32,3 +32,13 @@ lambdaFunction.role?.attachInlinePolicy(
   ],
  })
 );
+
+const { cfnUserPool } = backend.auth.resources.cfnResources;
+ if (Array.isArray(cfnUserPool.schema)) {
+    cfnUserPool.schema.push({
+        name: 'tenantId',
+        attributeDataType: 'String',
+        required: false,
+        mutable: true,
+    });
+}
