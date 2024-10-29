@@ -21,13 +21,17 @@ const client = generateClient<Schema>({
             'Authorization': session.tokens?.idToken?.toString() || '',
         };
     }
+    
 });
+
+console.log(client);
+
 
 const page = () => {
     const [mapDatas, setMapDatas] = useState<Schema["MapData"]["type"][]>([]);
 
     const fetchTodos = async () => {
-        const { data: items, errors } = await client.models.MapData.list();
+        const { data: items, errors } = await client.models.MapData.list({authMode: 'userPool'});
         setMapDatas(items);
       };
 
