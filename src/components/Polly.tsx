@@ -25,8 +25,6 @@ const Polly = () => {
     const [srcUrls, setSrcUrls] = useState<{ [key: string]: string }>({});
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-
-
     const handleSave = async () => {
       await client.models.Navigation.create({
         text,
