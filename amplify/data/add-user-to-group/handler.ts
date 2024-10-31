@@ -1,5 +1,5 @@
 import type { Schema } from "../resource"
-import { env } from "$amplify/env/add-user-to-group"
+import type { PostConfirmationTriggerHandler } from 'aws-lambda';
 import {
   AdminAddUserToGroupCommand,
   AdminUpdateUserAttributesCommand,
@@ -9,16 +9,15 @@ import {
 type Handler = Schema["addUserToGroup"]["functionHandler"]
 const client = new CognitoIdentityProviderClient()
 
-export const handler: Handler = async (event) => {
-  const { userId, groupName } = event.arguments
+export const handler: PostConfirmationTriggerHandler = async (event) => {
   const command = new AdminUpdateUserAttributesCommand({
-    Username: userId,
+    UserPoolId: event.userPoolId,
+    Username: event.userName,
     // GroupName: groupName,
-    UserPoolId: env.AMPLIFY_AUTH_USERPOOL_ID,
     UserAttributes: [
       {
         Name: 'custom:tenant_id', // 更新するカスタム属性の名前
-        Value: userId           // カスタム属性にコピーするID
+        Value: event.userName           // カスタム属性にコピーするID
       },
     ],
   })
