@@ -1,12 +1,10 @@
 import type { Schema } from "../resource"
 import type { PostConfirmationTriggerHandler } from 'aws-lambda';
 import {
-  AdminAddUserToGroupCommand,
   AdminUpdateUserAttributesCommand,
   CognitoIdentityProviderClient,
 } from "@aws-sdk/client-cognito-identity-provider"
 
-type Handler = Schema["addUserToGroup"]["functionHandler"]
 const client = new CognitoIdentityProviderClient()
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
